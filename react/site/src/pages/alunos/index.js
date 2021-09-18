@@ -31,55 +31,30 @@ export default function Index() {
         setAlunos(r);
     }
 
-    async function inserir(){
+    async function inserir() {
+        loading.current.continuousStart();
 
-        if(nomealuno == '' || nrchamada == ''  || nomecurso == '' || nmturma == '' )
-   return resp.send("os campos são obrigatórios")
-
-        if(idalterando === 0){
-            if(chamada < 0 )
-            return toast.error('Número inválido')
-       
-            
-            if(isNaN(chamada)){
-              return  toast.error("O Campo Chamado só aceita números");
+        if(chamada > 0) {
+            if (idAlterando == 0) {
+                let r = await api.inserir(nome, chamada, curso, turma);
+                if (r.erro) 
+                    toast.dark(r.erro);
+                else 
+                    toast.dark('Aluno inserido!');
+            } else {
+                let r = await api.alterar(idAlterando, nome, chamada, curso, turma);
+                if (r.erro) 
+                    toast.dark(r.erro);
+                else 
+                    toast.dark('Aluno alterado!');
             }
-            else{
-            loading.current.continuousStart();
-            let r = await api.Inserir(nome,chamada,curso,turma);
-            }
-    
-    
-            toast.dark('💕 Aluno Inserido!')
-            loading.current.complete();
-         } else {
-            loading.current.continuousStart();
-            let r = await api.alterar(idalterando, nome, chamada, curso, turma)
-            toast.dark('💕 Aluno Alterado!')
-            loading.current.complete();
-           }
-           limpar()
-           listar()
-       }
+        } else (
+            toast.dark('Chamada negativa')
+        );
 
-       let msmusu = await db.tb_matricula.findOne({
-        where:{nm_aluno:nomealuno}
-    })
-
-    if(msmusu != null)
-    return resp.send("Usuário já existe")
-   
-
-    let msmchamada = await db.tb_matricula.findOne({
-        where:{nr_chamada:nrchamada, nm_turma:nmturma}
-    })
-
-
-    if(msmchamada != null)
-    return resp.send("Usuário já existe")
-
-    if(nrchamada < 0 )
-     return resp.send('Número inválido')
+        limparCampos();
+        listar();
+    }
 
     function limparCampos() {
         setNome('');
